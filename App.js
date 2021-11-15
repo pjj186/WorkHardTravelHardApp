@@ -1,5 +1,6 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,17 +11,29 @@ import {
 } from "react-native";
 import { theme } from "./colors";
 
-// TouchableOpacity 는 누르는 이벤트를 listen 할 준비가 된 View 라고 이해
+const STORAGE_KEY = "@toDos";
 
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
 
+  useEffect(() => {
+    loadToDos();
+  }, []);
+
   const travel = () => setWorking(false);
   const work = () => setWorking(true);
   const onChangeText = (payload) => setText(payload);
-  const addToDo = () => {
+  const saveToDos = async (toSave) => {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+  const loadToDos = async () => {
+    const s = await AsyncStorage.getItem(STORAGE_KEY);
+    setToDos(JSON.parse(s));
+  };
+
+  const addToDo = async () => {
     if (text === "") {
       return;
     }
@@ -28,6 +41,7 @@ export default function App() {
     const newToDos = { ...toDos, [Date.now()]: { text, working } };
     // save to do
     setToDos(newToDos);
+    await saveToDos(newToDos);
     setText("");
   };
   return (

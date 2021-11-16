@@ -30,9 +30,9 @@ export default function App() {
     loadToDos();
   }, []);
 
-  // const clearAsyncStorage = async () => {
-  //   AsyncStorage.clear();
-  // };
+  const clearAsyncStorage = async () => {
+    AsyncStorage.clear();
+  };
 
   const travel = () => setWorkMod(false);
   const work = () => setWorkMod(true);
@@ -68,13 +68,19 @@ export default function App() {
 
   const getWorkMod = async () => {
     const w = await AsyncStorage.getItem(IS_WORK);
-    setWorking(JSON.parse(w));
+    if (w) {
+      setWorking(JSON.parse(w));
+    } else {
+      setWorking(true);
+    }
   };
 
   const loadToDos = async () => {
     try {
       const s = await AsyncStorage.getItem(STORAGE_KEY);
-      setToDos(JSON.parse(s));
+      if (s) {
+        setToDos(JSON.parse(s));
+      }
     } catch (error) {
       console.log(error);
     }

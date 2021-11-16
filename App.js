@@ -22,7 +22,6 @@ const IS_WORK = "@work";
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
-  const [editText, setEditText] = useState([]);
   const [toDos, setToDos] = useState({});
   const [edit, setEdit] = useState(false); // 리렌더링을 위해 정의
 
@@ -43,7 +42,6 @@ export default function App() {
       ...toDos,
       [payload.key]: { ...toDos[payload.key], text: payload.text },
     });
-    console.log(toDos);
   };
   const saveToDos = async (toSave) => {
     try {
@@ -113,10 +111,9 @@ export default function App() {
   };
 
   const EditDone = async (key) => {
-    if (editText === "") {
+    if (!toDos[key].text === "") {
       return;
     }
-
     toDos[key] = { ...toDos[key], isEdit: false };
 
     const newToDos = {

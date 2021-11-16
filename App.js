@@ -12,19 +12,26 @@ import {
 } from "react-native";
 import { Fontisto } from "@expo/vector-icons";
 import { theme } from "./colors";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 const STORAGE_KEY = "@toDos";
 const IS_WORK = "@work";
+const CHECKED = "@checked";
 
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
+  const [isCheck, setIsCheck] = useState(false);
 
   useEffect(() => {
     getWorkMod();
     loadToDos();
   }, []);
+
+  // const clearAsyncStorage = async () => {
+  //   AsyncStorage.clear();
+  // };
 
   const travel = () => setWorkMod(false);
   const work = () => setWorkMod(true);
@@ -36,9 +43,20 @@ export default function App() {
       console.log(error);
     }
   };
+
   const setWorkMod = async (value) => {
     setWorking(value);
     await AsyncStorage.setItem(IS_WORK, JSON.stringify(value));
+  };
+
+  const handleCheck = (key) => {
+    if (toDos[key].checked === false) {
+      toDos[key] = { ...toDos[key], checked: true };
+    } else {
+      toDos[key] = { ...toDos[key], checked: false };
+    }
+    const newToDos = { ...toDos, [key]: toDos[key] };
+    saveToDos(newToDos);
   };
 
   const getWorkMod = async () => {
@@ -60,7 +78,10 @@ export default function App() {
       return;
     }
 
-    const newToDos = { ...toDos, [Date.now()]: { text, working } };
+    const newToDos = {
+      ...toDos,
+      [Date.now()]: { text, working, checked: false },
+    };
     // save to do
     setToDos(newToDos);
     await saveToDos(newToDos);
@@ -110,16 +131,21 @@ export default function App() {
         style={styles.input}
       />
       <ScrollView>
-        {Object.keys(toDos).map((key) =>
-          toDos[key].working === working ? (
-            <View style={styles.toDo} key={key}>
-              <Text style={styles.toDoText}>{toDos[key].text}</Text>
-              <TouchableOpacity onPress={() => deleteToDo(key)}>
-                <Fontisto name="trash" size={18} color={theme.grey} />
-              </TouchableOpacity>
-            </View>
-          ) : null
-        )}
+        {toDos &&
+          Object.keys(toDos).map((key) =>
+            toDos[key].working === working ? (
+              <View style={styles.toDo} key={key}>
+                <BouncyCheckbox
+                  text={toDos[key].text}
+                  isChecked={toDos[key].checked}
+                  onPress={() => handleCheck(key)}
+                />
+                <TouchableOpacity onPress={() => deleteToDo(key)}>
+                  <Fontisto name="trash" size={18} color={theme.grey} />
+                </TouchableOpacity>
+              </View>
+            ) : null
+          )}
       </ScrollView>
     </View>
   );

@@ -13,16 +13,15 @@ import {
 import { Fontisto } from "@expo/vector-icons";
 import { theme } from "./colors";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
+import { Feather } from "@expo/vector-icons";
 
 const STORAGE_KEY = "@toDos";
 const IS_WORK = "@work";
-const CHECKED = "@checked";
 
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
-  const [isCheck, setIsCheck] = useState(false);
 
   useEffect(() => {
     getWorkMod();
@@ -143,9 +142,14 @@ export default function App() {
                   iconStyle={{ borderColor: "white" }}
                   fillColor="black"
                 />
-                <TouchableOpacity onPress={() => deleteToDo(key)}>
-                  <Fontisto name="trash" size={18} color={theme.grey} />
-                </TouchableOpacity>
+                <View style={styles.toolbox}>
+                  <TouchableOpacity>
+                    <Feather name="edit" size={24} color={theme.grey} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => deleteToDo(key)}>
+                    <Fontisto name="trash" size={24} color={theme.grey} />
+                  </TouchableOpacity>
+                </View>
               </View>
             ) : null
           )}
@@ -191,5 +195,11 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "500",
+  },
+  toolbox: {
+    flex: 0.25,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 });

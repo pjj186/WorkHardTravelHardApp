@@ -22,6 +22,7 @@ export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
+  const [isEdit, setIsEdit] = useState(false);
 
   useEffect(() => {
     getWorkMod();
@@ -102,6 +103,8 @@ export default function App() {
     ]);
   };
 
+  const EditToDo = async (key) => {};
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
@@ -134,22 +137,34 @@ export default function App() {
           Object.keys(toDos).map((key) =>
             toDos[key].working === working ? (
               <View style={styles.toDo} key={key}>
-                <BouncyCheckbox
-                  text={toDos[key].text}
-                  isChecked={toDos[key].checked}
-                  onPress={() => handleCheck(key)}
-                  size={25}
-                  iconStyle={{ borderColor: "white" }}
-                  fillColor="black"
-                />
-                <View style={styles.toolbox}>
-                  <TouchableOpacity>
-                    <Feather name="edit" size={24} color={theme.grey} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => deleteToDo(key)}>
-                    <Fontisto name="trash" size={24} color={theme.grey} />
-                  </TouchableOpacity>
-                </View>
+                {isEdit ? (
+                  <TextInput
+                    style={styles.editInput}
+                    value={toDos[key].text}
+                  ></TextInput>
+                ) : (
+                  <>
+                    <BouncyCheckbox
+                      text={toDos[key].text}
+                      isChecked={toDos[key].checked}
+                      onPress={() => handleCheck(key)}
+                      size={25}
+                      iconStyle={{ borderColor: "white" }}
+                      fillColor="black"
+                    />
+                    <View style={styles.toolbox}>
+                      <TouchableOpacity>
+                        <Feather name="edit" size={24} color={theme.grey} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => deleteToDo(key)}
+                        style={{ marginLeft: 10 }}
+                      >
+                        <Fontisto name="trash" size={24} color={theme.grey} />
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
               </View>
             ) : null
           )}
@@ -181,6 +196,15 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     fontSize: 18,
   },
+  editInput: {
+    flex: 1,
+    backgroundColor: theme.grey,
+    paddingVertical: 5,
+    paddingHorizontal: 5,
+    borderRadius: 5,
+    fontSize: 15,
+    color: "white",
+  },
   toDo: {
     flexDirection: "row",
     backgroundColor: theme.toDoBg,
@@ -197,9 +221,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   toolbox: {
-    flex: 0.25,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
   },
 });

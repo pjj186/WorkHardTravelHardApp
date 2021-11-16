@@ -14,6 +14,7 @@ import { Fontisto } from "@expo/vector-icons";
 import { theme } from "./colors";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { Feather } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const STORAGE_KEY = "@toDos";
 const IS_WORK = "@work";
@@ -21,8 +22,9 @@ const IS_WORK = "@work";
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
+  const [editText, setEditText] = useState("");
   const [toDos, setToDos] = useState({});
-  const [isEdit, setIsEdit] = useState(false);
+  const [edit, setEdit] = useState(false); // 리렌더링을 위해 정의
 
   useEffect(() => {
     getWorkMod();
@@ -36,6 +38,7 @@ export default function App() {
   const travel = () => setWorkMod(false);
   const work = () => setWorkMod(true);
   const onChangeText = (payload) => setText(payload);
+  const onEditChangeText = (payload) => setEditText(payload);
   const saveToDos = async (toSave) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
@@ -43,12 +46,6 @@ export default function App() {
       console.log(error);
     }
   };
-
-  const setWorkMod = async (value) => {
-    setWorking(value);
-    await AsyncStorage.setItem(IS_WORK, JSON.stringify(value));
-  };
-
   const handleCheck = (key) => {
     if (toDos[key].checked === false) {
       toDos[key] = { ...toDos[key], checked: true };
@@ -56,7 +53,13 @@ export default function App() {
       toDos[key] = { ...toDos[key], checked: false };
     }
     const newToDos = { ...toDos, [key]: toDos[key] };
+    setToDos(newToDos);
     saveToDos(newToDos);
+  };
+
+  const setWorkMod = async (value) => {
+    setWorking(value);
+    await AsyncStorage.setItem(IS_WORK, JSON.stringify(value));
   };
 
   const getWorkMod = async () => {
@@ -80,7 +83,7 @@ export default function App() {
 
     const newToDos = {
       ...toDos,
-      [Date.now()]: { text, working, checked: false },
+      [Date.now()]: { text, working, checked: false, isEdit: false },
     };
     // save to do
     setToDos(newToDos);
@@ -103,7 +106,37 @@ export default function App() {
     ]);
   };
 
-  const EditToDo = async (key) => {};
+  const EditDone = async (key) => {
+    if (editText === "") {
+      return;
+    }
+
+    toDos[key] = { ...toDos[key], text: editText, isEdit: false };
+
+    const newToDos = {
+      ...toDos,
+      [key]: toDos[key],
+    };
+    setToDos(newToDos);
+    await saveToDos(newToDos);
+  };
+
+  const EditToDo = (key, text) => {
+    setEditText(text);
+    toDos[key] = { ...toDos[key], isEdit: true };
+    const newToDos = { ...toDos, [key]: toDos[key] };
+    setEdit(true);
+    setToDos(newToDos);
+    saveToDos(newToDos);
+  };
+
+  const CancelEdit = (key) => {
+    toDos[key] = { ...toDos[key], isEdit: false };
+    const newToDos = { ...toDos, [key]: toDos[key] };
+    setEdit(false);
+    setToDos(newToDos);
+    saveToDos(newToDos);
+  };
 
   return (
     <View style={styles.container}>
@@ -137,11 +170,23 @@ export default function App() {
           Object.keys(toDos).map((key) =>
             toDos[key].working === working ? (
               <View style={styles.toDo} key={key}>
-                {isEdit ? (
-                  <TextInput
-                    style={styles.editInput}
-                    value={toDos[key].text}
-                  ></TextInput>
+                {toDos[key].isEdit ? (
+                  <>
+                    <TextInput
+                      onSubmitEditing={() => EditDone(key)}
+                      style={styles.editInput}
+                      value={editText}
+                      onChangeText={onEditChangeText}
+                      returnKeyType="done"
+                    ></TextInput>
+                    <TouchableOpacity onPress={() => CancelEdit(key)}>
+                      <MaterialIcons
+                        name="cancel"
+                        size={24}
+                        color={theme.grey}
+                      />
+                    </TouchableOpacity>
+                  </>
                 ) : (
                   <>
                     <BouncyCheckbox
@@ -153,7 +198,9 @@ export default function App() {
                       fillColor="black"
                     />
                     <View style={styles.toolbox}>
-                      <TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => EditToDo(key, toDos[key].text)}
+                      >
                         <Feather name="edit" size={24} color={theme.grey} />
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -197,13 +244,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   editInput: {
-    flex: 1,
-    backgroundColor: theme.grey,
+    flex: 0.8,
+    backgroundColor: "white",
     paddingVertical: 5,
     paddingHorizontal: 5,
     borderRadius: 5,
     fontSize: 15,
-    color: "white",
+    color: "black",
   },
   toDo: {
     flexDirection: "row",

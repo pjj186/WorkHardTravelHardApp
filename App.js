@@ -22,7 +22,7 @@ const IS_WORK = "@work";
 export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
-  const [editText, setEditText] = useState("");
+  const [editText, setEditText] = useState([]);
   const [toDos, setToDos] = useState({});
   const [edit, setEdit] = useState(false); // 리렌더링을 위해 정의
 
@@ -38,7 +38,13 @@ export default function App() {
   const travel = () => setWorkMod(false);
   const work = () => setWorkMod(true);
   const onChangeText = (payload) => setText(payload);
-  const onEditChangeText = (payload) => setEditText(payload);
+  const onEditChangeText = (payload) => {
+    setToDos({
+      ...toDos,
+      [payload.key]: { ...toDos[payload.key], text: payload.text },
+    });
+    console.log(toDos);
+  };
   const saveToDos = async (toSave) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
@@ -111,7 +117,7 @@ export default function App() {
       return;
     }
 
-    toDos[key] = { ...toDos[key], text: editText, isEdit: false };
+    toDos[key] = { ...toDos[key], isEdit: false };
 
     const newToDos = {
       ...toDos,
@@ -121,8 +127,7 @@ export default function App() {
     await saveToDos(newToDos);
   };
 
-  const EditToDo = (key, text) => {
-    setEditText(text);
+  const EditToDo = (key) => {
     toDos[key] = { ...toDos[key], isEdit: true };
     const newToDos = { ...toDos, [key]: toDos[key] };
     setEdit(true);
@@ -136,6 +141,12 @@ export default function App() {
     setEdit(false);
     setToDos(newToDos);
     saveToDos(newToDos);
+    console.log(toDos);
+  };
+
+  const ResetEdit = () => {
+    const newToDos = { ...toDos };
+    console.log(newToDos);
   };
 
   return (
@@ -175,8 +186,8 @@ export default function App() {
                     <TextInput
                       onSubmitEditing={() => EditDone(key)}
                       style={styles.editInput}
-                      value={editText}
-                      onChangeText={onEditChangeText}
+                      value={toDos[key].text}
+                      onChangeText={(text) => onEditChangeText({ key, text })}
                       returnKeyType="done"
                     ></TextInput>
                     <TouchableOpacity onPress={() => CancelEdit(key)}>
@@ -198,9 +209,7 @@ export default function App() {
                       fillColor="black"
                     />
                     <View style={styles.toolbox}>
-                      <TouchableOpacity
-                        onPress={() => EditToDo(key, toDos[key].text)}
-                      >
+                      <TouchableOpacity onPress={() => EditToDo(key)}>
                         <Feather name="edit" size={24} color={theme.grey} />
                       </TouchableOpacity>
                       <TouchableOpacity

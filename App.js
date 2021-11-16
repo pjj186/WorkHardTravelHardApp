@@ -139,6 +139,9 @@ export default function App() {
                   text={toDos[key].text}
                   isChecked={toDos[key].checked}
                   onPress={() => handleCheck(key)}
+                  size={25}
+                  iconStyle={{ borderColor: "white" }}
+                  fillColor="black"
                 />
                 <TouchableOpacity onPress={() => deleteToDo(key)}>
                   <Fontisto name="trash" size={18} color={theme.grey} />

@@ -14,6 +14,7 @@ import { Fontisto } from "@expo/vector-icons";
 import { theme } from "./colors";
 
 const STORAGE_KEY = "@toDos";
+const IS_WORK = "@work";
 
 export default function App() {
   const [working, setWorking] = useState(true);
@@ -21,11 +22,12 @@ export default function App() {
   const [toDos, setToDos] = useState({});
 
   useEffect(() => {
+    getWorkMod();
     loadToDos();
   }, []);
 
-  const travel = () => setWorking(false);
-  const work = () => setWorking(true);
+  const travel = () => setWorkMod(false);
+  const work = () => setWorkMod(true);
   const onChangeText = (payload) => setText(payload);
   const saveToDos = async (toSave) => {
     try {
@@ -34,6 +36,16 @@ export default function App() {
       console.log(error);
     }
   };
+  const setWorkMod = async (value) => {
+    setWorking(value);
+    await AsyncStorage.setItem(IS_WORK, JSON.stringify(value));
+  };
+
+  const getWorkMod = async () => {
+    const w = await AsyncStorage.getItem(IS_WORK);
+    setWorking(JSON.parse(w));
+  };
+
   const loadToDos = async () => {
     try {
       const s = await AsyncStorage.getItem(STORAGE_KEY);

@@ -31,10 +31,6 @@ export default function App() {
     loadToDos();
   }, []);
 
-  const clearAsyncStorage = async () => {
-    AsyncStorage.clear();
-  };
-
   const travel = () => setWorkMod(false);
   const work = () => setWorkMod(true);
   const onChangeText = (payload) => setText(payload);

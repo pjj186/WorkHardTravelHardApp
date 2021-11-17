@@ -155,12 +155,12 @@ export default function App() {
     setEdit(false);
     setToDos(newToDos);
     saveToDos(newToDos);
-    console.log(toDos);
   };
 
   const ResetEdit = () => {
+    // 앱을 시작할 때, Edit을 초기화 하기 위한 함수
+    // 미완성
     const newToDos = { ...toDos };
-    console.log(newToDos);
   };
 
   return (
